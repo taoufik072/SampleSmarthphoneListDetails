@@ -1,0 +1,13 @@
+/build
+*.iml
+
+# Test results
+test-results/
+androidTest-results/
+
+# Coverage
+jacoco/
+*.exec
+
+# Generated
+generated/

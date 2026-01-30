@@ -1,0 +1,15 @@
+/build
+*.iml
+
+# Test results
+test-results/
+
+# Coverage
+jacoco/
+*.exec
+
+# Generated
+generated/
+
+# Database schemas
+schemas/
