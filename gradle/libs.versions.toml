@@ -1,11 +1,11 @@
 [versions]
 # Kotlin & Core
-kotlin = "2.1.0"
+kotlin = "2.3.0"
 coroutines = "1.10.2"
-ksp = "2.1.0-1.0.29"
+ksp = "2.3.6"
 
 # Android
-agp = "8.9.1"
+agp = "9.0.1"
 compileSdk = "36"
 targetSdk = "36"
 minSdk = "26"
@@ -21,17 +21,18 @@ compose-compiler = "1.5.15"
 navigation-compose = "2.9.6"
 
 # Dependency Injection
-hilt = "2.52"
+hilt = "2.59.2"
 hilt-navigation-compose = "1.2.0"
 
 # Database
 room = "2.8.4"
 
+# Serialization
+kotlinx-serialization = "1.8.1"
+
 # Network
 retrofit = "3.0.0"
 okhttp = "5.3.2"
-gson = "2.13.2"
-moshi = "1.15.2"
 
 # Image Loading
 coil = "3.3.0"
@@ -84,18 +85,14 @@ room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
 
+# Kotlin Serialization
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+
 # Retrofit & OkHttp
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
-retrofit-converter-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "retrofit" }
+retrofit-converter-kotlinx-serialization = { module = "com.squareup.retrofit2:converter-kotlinx-serialization", version.ref = "retrofit" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okhttp-logging = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
-
-
-
-# Moshi
-moshi = { module = "com.squareup.moshi:moshi", version.ref = "moshi" }
-moshi-kotlin = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "moshi" }
-moshi-codegen = { module = "com.squareup.moshi:moshi-kotlin-codegen", version.ref = "moshi" }
 
 # Dependency Injection (Pure Java/Kotlin)
 javax-inject = { module = "javax.inject:javax.inject", version = "1" }
@@ -129,7 +126,6 @@ compose = [
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

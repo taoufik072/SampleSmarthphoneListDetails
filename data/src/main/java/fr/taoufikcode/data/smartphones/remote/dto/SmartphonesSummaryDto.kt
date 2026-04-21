@@ -1,16 +1,13 @@
 package fr.taoufikcode.data.smartphones.remote.dto
-
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
-
-@JsonClass(generateAdapter = true)
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+@Serializable
 data class HomeResponseDto(
-    @param:Json(name = "smartphones") val smartphones: List<SmartphoneSummaryDto>
+    @SerialName("smartphones") val smartphones: List<SmartphoneSummaryDto>
 )
-
-@JsonClass(generateAdapter = true)
+@Serializable
 data class SmartphoneSummaryDto(
-    @param:Json(name = "id") val id: String,
-    @param:Json(name = "model") val model: String?,
-    @param:Json(name = "imageUrl") val imageUrl: String?
+    @SerialName("id") val id: String,
+    @SerialName("model") val model: String?,
+    @SerialName("imageUrl") val imageUrl: String?
 )
