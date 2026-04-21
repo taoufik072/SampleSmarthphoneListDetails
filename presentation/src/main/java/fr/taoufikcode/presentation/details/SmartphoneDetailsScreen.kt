@@ -34,8 +34,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import fr.taoufikcode.presentation.common.ErrorState
 import fr.taoufikcode.presentation.common.LoadingState
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

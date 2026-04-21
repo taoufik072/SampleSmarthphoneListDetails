@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
 }
+
 android {
     namespace = "com.taoufikcode.data"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -17,11 +18,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-
     kotlin {
         jvmToolchain(17)
     }
-
     packaging {
 
         resources {

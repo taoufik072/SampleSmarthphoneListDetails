@@ -1,9 +1,8 @@
 package fr.taoufikcode.common
 
+import java.time.Clock
 import java.time.Duration
 import java.time.Instant
-
-import java.time.Clock
 
 fun Long.isExpired(minutePassed: Long, clock: Clock = Clock.systemDefaultZone()): Boolean {
     val currentTime = Instant.now(clock).toEpochMilli()

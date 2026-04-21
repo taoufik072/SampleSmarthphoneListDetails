@@ -1,6 +1,5 @@
 package fr.taoufikcode.domain.usecase.smartphone
 
-import fr.taoufikcode.domain.model.smartphone.SmartphoneDetails
 import fr.taoufikcode.domain.repository.smartphone.SmartphoneDetailsRepository
 import javax.inject.Inject
 

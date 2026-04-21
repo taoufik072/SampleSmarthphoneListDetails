@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+
 android {
     namespace = "com.taoufikcode.discover"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -45,10 +46,6 @@ android {
         kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
     }
 
-    kotlin {
-        jvmToolchain(17)
-    }
-
     packaging {
         resources.excludes += "META-INF/versions/9/OSGI-INF/MANIFEST.MF"
     }
@@ -69,7 +66,9 @@ android {
         }
     }
 }
-
+kotlin {
+    jvmToolchain(17)
+}
 dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)

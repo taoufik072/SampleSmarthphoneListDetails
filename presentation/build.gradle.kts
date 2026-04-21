@@ -21,7 +21,6 @@ android {
     kotlin {
         jvmToolchain(17)
     }
-
     buildFeatures {
         compose = true
     }
@@ -63,7 +62,9 @@ dependencies {
     implementation(libs.compose.material.icons.extended)
 
     // Testing
+    testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
     testImplementation(libs.turbine)
+    testImplementation(kotlin("test"))
 }

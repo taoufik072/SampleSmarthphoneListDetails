@@ -1,25 +1,21 @@
 package fr.taoufikcode.presentation.details
 
 import androidx.lifecycle.SavedStateHandle
-import app.cash.turbine.test
 import fr.taoufikcode.domain.model.smartphone.SmartphoneDetails
 import fr.taoufikcode.domain.usecase.smartphone.GetSmartphoneDetailsByIdUseCase
 import io.mockk.coEvery
 import io.mockk.mockk
+import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.time.LocalDate
