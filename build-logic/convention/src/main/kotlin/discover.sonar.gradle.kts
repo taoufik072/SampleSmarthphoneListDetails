@@ -41,6 +41,62 @@ sonar {
                 .filter { File(it).exists() }
                 .joinToString(","),
         )
+        property(
+            "sonar.exclusions",
+            listOf(
+                // Room generated
+                "**/*Dao_Impl*.kt",
+                "**/*Database_Impl*.kt",
+                // Compose generated
+                "**/*ComposableSingletons*.kt",
+                // Build metadata
+                "**/BuildConfig.kt",
+                // DTOs and Room entities
+                "**/dto/**",
+                "**/entity/**",
+            ).joinToString(","),
+        )
+        property(
+            "sonar.coverage.exclusions",
+            listOf(
+                // DI wiring
+                "**/di/**",
+                // Room generated and database
+                "**/*Dao_Impl*.kt",
+                "**/*Database_Impl*.kt",
+                "**/SmartphoneDatabase.kt",
+                // Room DAOs and DataStore
+                "**/local/dao/**",
+                "**/local/datastore/**",
+                // DTOs and Room entities
+                "**/dto/**",
+                "**/entity/**",
+                // Android framework entry points
+                "**/DiscoverApplication.kt",
+                "**/MainActivity.kt",
+                // Navigation and theme
+                "**/navigation/**",
+                "**/ui/theme/**",
+                // Compose generated
+                "**/*ComposableSingletons*.kt",
+                // Compose UI screens and common components
+                "**/presentation/common/**",
+                "**/*Screen*.kt",
+                // Build metadata
+                "**/BuildConfig.kt",
+                // Infrastructure
+                "**/logger/**",
+                "**/coroutines/DefaultDispatcherProvider.kt",
+            ).joinToString(","),
+        )
+    }
+}
 
+// The SonarQube Gradle plugin auto-applies itself to every subproject and registers their
+// source dirs as child modules. Combined with the explicit sonar.sources above, this causes
+// "can't be indexed twice" errors. Skipping subprojects enforces a flat single-module analysis.
+subprojects {
+    sonar {
+        isSkipProject = true
     }
 }

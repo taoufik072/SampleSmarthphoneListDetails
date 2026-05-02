@@ -65,11 +65,11 @@ kover {
         }
         total {
             xml {
-                onCheck = false
+                onCheck = true
                 xmlFile = layout.buildDirectory.file("reports/kover/report.xml")
             }
             html {
-                onCheck = false
+                onCheck = true
                 htmlDir = layout.buildDirectory.dir("reports/kover/html")
             }
         }
