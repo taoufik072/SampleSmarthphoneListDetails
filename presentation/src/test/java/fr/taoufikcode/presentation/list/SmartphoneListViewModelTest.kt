@@ -1,6 +1,12 @@
 package fr.taoufikcode.presentation.list
 
 import app.cash.turbine.test
+import assertk.assertThat
+import assertk.assertions.contains
+import assertk.assertions.isEqualTo
+import assertk.assertions.isFalse
+import assertk.assertions.isInstanceOf
+import assertk.assertions.isNull
 import fr.taoufikcode.domain.model.home.SmartphoneSummary
 import fr.taoufikcode.domain.usecase.home.GetSmartphonesSummaryUseCase
 import fr.taoufikcode.domain.usecase.home.GetSyncStatusUseCase
@@ -18,16 +24,11 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SmartphoneListViewModelTest {
-
     private lateinit var getSmartphonesUseCase: GetSmartphonesSummaryUseCase
     private lateinit var syncUseCase: SyncSmartphonesUseCase
     private lateinit var getSyncStatusUseCase: GetSyncStatusUseCase
@@ -52,82 +53,88 @@ class SmartphoneListViewModelTest {
     }
 
     @Test
-    fun `when smartphones loaded successfully then state contains smartphones`() = runTest {
-        //Given
-        val smartphones = listOf(
-            SmartphoneSummary("1", "iPhone 15", "url1"),
-            SmartphoneSummary("2", "Samsung S24", "url2")
-        )
-        every { getSmartphonesUseCase() } returns flowOf(smartphones)
-        coEvery { getSyncStatusUseCase.invoke() } returns flowOf(0L)
+    fun `when smartphones loaded successfully then state contains smartphones`() =
+        runTest {
+            // Given
+            val smartphones =
+                listOf(
+                    SmartphoneSummary("1", "iPhone 15", "url1"),
+                    SmartphoneSummary("2", "Samsung S24", "url2"),
+                )
+            every { getSmartphonesUseCase() } returns flowOf(smartphones)
+            coEvery { getSyncStatusUseCase.invoke() } returns flowOf(0L)
 
-        // When
-        viewModel = SmartphoneListViewModel(
-            getSmartphonesUseCase,
-            syncUseCase,
-            getSyncStatusUseCase,
-            saveSyncDateUseCase
-        )
+            // When
+            viewModel =
+                SmartphoneListViewModel(
+                    getSmartphonesUseCase,
+                    syncUseCase,
+                    getSyncStatusUseCase,
+                    saveSyncDateUseCase,
+                )
 
-        // Then
-        testScheduler.advanceUntilIdle()
-        
-        val state = viewModel.state.value
-        assertEquals(2, state.smartphones.size)
-        assertFalse(state.isLoading)
-        assertNull(state.error)
-    }
+            // Then
+            testScheduler.advanceUntilIdle()
 
-    @Test
-    fun `when OnRefresh action then sync is triggered`() = runTest {
-        // Given
-        every { getSmartphonesUseCase() } returns flowOf(emptyList())
-        coEvery { getSyncStatusUseCase.invoke() } returns flowOf(0L)
-        coEvery { syncUseCase() } returns Result.success(Unit)
-
-        viewModel = SmartphoneListViewModel(
-            getSmartphonesUseCase,
-            syncUseCase,
-            getSyncStatusUseCase,
-            saveSyncDateUseCase
-        )
-
-        testScheduler.advanceUntilIdle()
-
-        // When
-        viewModel.onAction(ListActions.Refresh)
-        testScheduler.advanceUntilIdle()
-
-        // Then
-        coVerify { syncUseCase() }
-    }
+            val state = viewModel.state.value
+            assertThat(state.smartphones.size).isEqualTo(2)
+            assertThat(state.isLoading).isFalse()
+            assertThat(state.error).isNull()
+        }
 
     @Test
-    fun `when sync fails then error event is emitted`() = runTest {
-        // Given
-        val errorMessage = "Sync failed"
-        every { getSmartphonesUseCase() } returns flowOf(emptyList())
-        coEvery { getSyncStatusUseCase.invoke() } returns flowOf(0L)
-        coEvery { syncUseCase() } returns Result.failure(Exception(errorMessage))
+    fun `when OnRefresh action then sync is triggered`() =
+        runTest {
+            // Given
+            every { getSmartphonesUseCase() } returns flowOf(emptyList())
+            coEvery { getSyncStatusUseCase.invoke() } returns flowOf(0L)
+            coEvery { syncUseCase() } returns Result.success(Unit)
 
-        viewModel = SmartphoneListViewModel(
-            getSmartphonesUseCase,
-            syncUseCase,
-            getSyncStatusUseCase,
-            saveSyncDateUseCase
-        )
+            viewModel =
+                SmartphoneListViewModel(
+                    getSmartphonesUseCase,
+                    syncUseCase,
+                    getSyncStatusUseCase,
+                    saveSyncDateUseCase,
+                )
 
-        testScheduler.advanceUntilIdle()
+            testScheduler.advanceUntilIdle()
 
-        // When/Then
-        viewModel.events.test {
+            // When
             viewModel.onAction(ListActions.Refresh)
             testScheduler.advanceUntilIdle()
 
-            val event = awaitItem()
-            assertTrue(event is SmartphoneListEvent.ShowError)
-            assertTrue((event as SmartphoneListEvent.ShowError).message.contains(errorMessage))
+            // Then
+            coVerify { syncUseCase() }
         }
-    }
 
+    @Test
+    fun `when sync fails then error event is emitted`() =
+        runTest {
+            // Given
+            val errorMessage = "Sync failed"
+            every { getSmartphonesUseCase() } returns flowOf(emptyList())
+            coEvery { getSyncStatusUseCase.invoke() } returns flowOf(0L)
+            coEvery { syncUseCase() } returns Result.failure(Exception(errorMessage))
+
+            viewModel =
+                SmartphoneListViewModel(
+                    getSmartphonesUseCase,
+                    syncUseCase,
+                    getSyncStatusUseCase,
+                    saveSyncDateUseCase,
+                )
+
+            testScheduler.advanceUntilIdle()
+
+            // When/Then
+            viewModel.events.test {
+                viewModel.onAction(ListActions.Refresh)
+                testScheduler.advanceUntilIdle()
+
+                val event = awaitItem()
+                assertThat(event).isInstanceOf(SmartphoneListEvent.ShowError::class)
+                assertThat((event as SmartphoneListEvent.ShowError).message).contains(errorMessage)
+            }
+        }
 }

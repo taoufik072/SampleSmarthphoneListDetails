@@ -2,7 +2,6 @@ package fr.taoufikcode.presentation.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import fr.taoufikcode.common.isExpired
 import fr.taoufikcode.domain.usecase.home.GetSmartphonesSummaryUseCase
 import fr.taoufikcode.domain.usecase.home.GetSyncStatusUseCase
@@ -18,17 +17,17 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+import org.koin.core.annotation.KoinViewModel
 
-@HiltViewModel
-class SmartphoneListViewModel @Inject constructor(
+@KoinViewModel
+class SmartphoneListViewModel(
     private val getSmartphonesSummaryUseCase: GetSmartphonesSummaryUseCase,
     private val syncSmartphonesUseCase: SyncSmartphonesUseCase,
     private val getSyncStatusUseCase: GetSyncStatusUseCase,
-    private val saveSyncDateUseCase: SaveSyncDateUseCase
+    private val saveSyncDateUseCase: SaveSyncDateUseCase,
 ) : ViewModel() {
     private val _state = MutableStateFlow(SmartphoneListState())
-    internal val state = _state.asStateFlow()
+    val state = _state.asStateFlow()
 
     init {
         loadSmartphones()
@@ -48,56 +47,63 @@ class SmartphoneListViewModel @Inject constructor(
     private fun onRefresh() {
         viewModelScope.launch {
             _state.update { it.copy(isRefreshing = true) }
-            syncSmartphonesUseCase().onSuccess {
-                _state.update { it.copy(isRefreshing = false, error = null) }
-            }.onFailure { error ->
-                _state.update {
-                    it.copy(
-                        isRefreshing = false,
-                        error = error.message ?: "Sync failed"
-                    )
+            syncSmartphonesUseCase()
+                .onSuccess {
+                    _state.update { it.copy(isRefreshing = false, error = null) }
+                }.onFailure { error ->
+                    _state.update {
+                        it.copy(
+                            isRefreshing = false,
+                            error = error.message ?: "Sync failed",
+                        )
+                    }
+                    _events.trySend(SmartphoneListEvent.ShowError("Sync failed: ${error.message}"))
                 }
-                _events.trySend(SmartphoneListEvent.ShowError("Sync failed: ${error.message}"))
-            }
         }
     }
 
-     fun loadSmartphones() {
+    private fun loadSmartphones() {
         getSmartphonesSummaryUseCase()
             .onEach { smartphonesList ->
                 _state.update {
                     it.copy(
                         smartphones = smartphonesList.map { smartphone -> smartphone.toUi() },
                         isLoading = false,
-                        error = null
+                        error = null,
                     )
                 }
-            }
-            .catch { error ->
+            }.catch { error ->
                 _state.update {
                     it.copy(
                         isLoading = false,
-                        error = error.message ?: "Failed to load smartphones"
+                        error = error.message ?: "Failed to load smartphones",
                     )
                 }
-                _events.trySend(SmartphoneListEvent.ShowError("Failed to load data: ${error.message}"))
-            }
-            .launchIn(viewModelScope)
+                _events.trySend(
+                    SmartphoneListEvent.ShowError("Failed to load data: ${error.message}"),
+                )
+            }.launchIn(viewModelScope)
     }
 
-     fun checkAndSync() {
+    @Suppress("TooGenericExceptionCaught")
+    private fun checkAndSync() {
         viewModelScope.launch {
             try {
                 val syncStatus = getSyncStatusUseCase.invoke().first()
                 if (syncStatus.isExpired(minutePassed = SYNC_INTERVAL_MINUTES)) {
-                    syncSmartphonesUseCase().onSuccess {
-                        saveSyncDateUseCase(System.currentTimeMillis())
-                    }.onFailure { error ->
-                        _events.trySend(SmartphoneListEvent.ShowError("Sync failed: ${error.message}"))
-                    }
+                    syncSmartphonesUseCase()
+                        .onSuccess {
+                            saveSyncDateUseCase(System.currentTimeMillis())
+                        }.onFailure { error ->
+                            _events.trySend(
+                                SmartphoneListEvent.ShowError("Sync failed: ${error.message}"),
+                            )
+                        }
                 }
             } catch (error: Exception) {
-                _events.trySend(SmartphoneListEvent.ShowError("Failed to check sync status: ${error.message}"))
+                _events.trySend(
+                    SmartphoneListEvent.ShowError("Failed to check sync status: ${error.message}"),
+                )
             }
         }
     }

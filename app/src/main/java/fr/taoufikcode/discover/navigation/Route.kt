@@ -7,5 +7,7 @@ sealed interface Route {
     data object SmartphoneList : Route
 
     @Serializable
-    data class SmartphoneDetails(val smartphoneId: String) : Route
+    data class SmartphoneDetails(
+        val smartphoneId: String,
+    ) : Route
 }
