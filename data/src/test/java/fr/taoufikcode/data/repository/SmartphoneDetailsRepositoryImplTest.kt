@@ -94,4 +94,26 @@ class SmartphoneDetailsRepositoryImplTest {
             assertThat(result.isFailure).isTrue()
             assertThat(result.exceptionOrNull()?.message).isEqualTo("Request timed out. Please try again.")
         }
+
+    @Test
+    fun `getSmartphoneById on 429 returns failure with TOO_MANY_REQUESTS message`() =
+        runTest {
+            detailsResponse = MockResponse("error", HttpStatusCode.TooManyRequests)
+
+            val result = repository.getSmartphoneById("1")
+
+            assertThat(result.isFailure).isTrue()
+            assertThat(result.exceptionOrNull()?.message).isEqualTo("Too many requests. Please wait and retry.")
+        }
+
+    @Test
+    fun `getSmartphoneById on 401 returns failure with UNKNOWN error message`() =
+        runTest {
+            detailsResponse = MockResponse("error", HttpStatusCode.Unauthorized)
+
+            val result = repository.getSmartphoneById("1")
+
+            assertThat(result.isFailure).isTrue()
+            assertThat(result.exceptionOrNull()?.message).isEqualTo("An unknown error occurred.")
+        }
 }

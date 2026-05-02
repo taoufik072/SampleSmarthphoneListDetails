@@ -5,6 +5,7 @@ import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
+import assertk.assertions.isTrue
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isNull
 import fr.taoufikcode.domain.model.home.SmartphoneSummary
@@ -130,5 +131,56 @@ class SmartphoneListViewModelTest {
                 assertThat(event).isInstanceOf(SmartphoneListEvent.ShowError::class)
                 assertThat((event as SmartphoneListEvent.ShowError).message).contains(errorMessage)
             }
+        }
+
+    @Test
+    fun `initial state has isLoading = true`() =
+        runTest {
+            // Given
+            every { getSmartphonesUseCase() } returns flowOf(emptyList())
+            coEvery { checkAndSyncUseCase() } returns Result.success(Unit)
+
+            // When — construct but do not advance: SmartphoneListState defaults isLoading = true
+            viewModel = SmartphoneListViewModel(getSmartphonesUseCase, syncUseCase, checkAndSyncUseCase)
+
+            // Then
+            assertThat(viewModel.state.value.isLoading).isTrue()
+        }
+
+    @Test
+    fun `when smartphones loaded then isLoading becomes false`() =
+        runTest {
+            // Given
+            every { getSmartphonesUseCase() } returns
+                flowOf(listOf(SmartphoneSummary("1", "iPhone 15", "url")))
+            coEvery { checkAndSyncUseCase() } returns Result.success(Unit)
+
+            // When
+            viewModel = SmartphoneListViewModel(getSmartphonesUseCase, syncUseCase, checkAndSyncUseCase)
+            testScheduler.advanceUntilIdle()
+
+            // Then
+            assertThat(viewModel.state.value.isLoading).isFalse()
+        }
+
+    @Test
+    fun `when refresh fails then error is set in state`() =
+        runTest {
+            // Given
+            val errorMessage = "Network error"
+            every { getSmartphonesUseCase() } returns flowOf(emptyList())
+            coEvery { checkAndSyncUseCase() } returns Result.success(Unit)
+            coEvery { syncUseCase() } returns Result.failure(Exception(errorMessage))
+
+            viewModel = SmartphoneListViewModel(getSmartphonesUseCase, syncUseCase, checkAndSyncUseCase)
+            testScheduler.advanceUntilIdle()
+
+            // When
+            viewModel.onAction(ListActions.Refresh)
+            testScheduler.advanceUntilIdle()
+
+            // Then
+            assertThat(viewModel.state.value.error).isEqualTo(errorMessage)
+            assertThat(viewModel.state.value.isRefreshing).isFalse()
         }
 }

@@ -145,4 +145,13 @@ class SmartphonesSummaryRepositoryImplTest {
             assertThat(result.exceptionOrNull()?.message)
                 .isEqualTo(DataError.Local.UNKNOWN.toDomain())
         }
+
+    @Test
+    fun `saveSyncDateHome when dataStore succeeds returns success`() =
+        runTest {
+            val result = repository.saveSyncDateHome(System.currentTimeMillis())
+
+            assertThat(result.isSuccess).isTrue()
+            coVerify { dataStore.saveSyncDateHome(any()) }
+        }
 }
