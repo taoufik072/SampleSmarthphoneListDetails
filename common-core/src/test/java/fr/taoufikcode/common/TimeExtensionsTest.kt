@@ -1,13 +1,13 @@
 package fr.taoufikcode.common
 
-import org.junit.Assert.assertTrue
+import assertk.assertThat
+import assertk.assertions.isTrue
 import org.junit.Test
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneId
 
 class TimeExtensionsTest {
-
     private val fixedTime = Instant.parse("2026-01-01T12:00:00Z").toEpochMilli()
     private val fixedClock = Clock.fixed(Instant.ofEpochMilli(fixedTime), ZoneId.of("UTC"))
 
@@ -20,7 +20,7 @@ class TimeExtensionsTest {
         val result = timestamp.isExpired(minutePassed = 60, clock = fixedClock)
 
         // Then
-        assertTrue(result)
+        assertThat(result).isTrue()
     }
 
     @Test
@@ -32,7 +32,7 @@ class TimeExtensionsTest {
         val result = timestamp.isExpired(minutePassed = 5, clock = fixedClock)
 
         // Then
-        assertTrue(result)
+        assertThat(result).isTrue()
     }
 
     @Test
@@ -44,6 +44,6 @@ class TimeExtensionsTest {
         val result = timestamp.isExpired(minutePassed = 1, clock = fixedClock)
 
         // Then
-        assertTrue(result)
+        assertThat(result).isTrue()
     }
 }
