@@ -20,9 +20,7 @@ A sample Android application showcasing a Clean Architecture + MVI stack with mo
 | DI | Koin BOM | 4.2.1 |
 | DI codegen | Koin Compiler Plugin | 1.0.0-RC2 |
 | Networking | Ktor (OkHttp engine) | 3.4.3 |
-| Serialization | kotlinx-serialization-json | 1.11.0 |
 | Local DB | Room | 2.8.4 |
-| Preferences | DataStore Preferences | 1.2.1 |
 | Image loading | Coil 3 | 3.4.0 |
 | Logging | Kermit | 2.1.0 |
 
@@ -31,11 +29,9 @@ A sample Android application showcasing a Clean Architecture + MVI stack with mo
 | Library | Purpose | Version |
 |---|---|---|
 | JUnit 4 | Test runner | 4.13.2 |
-| MockK | Mocking / faking | 1.14.9 |
+| MockK | Mocking | 1.14.9 |
 | Turbine | `Flow` & `StateFlow` assertions | 1.2.1 |
-| AssertK | Fluent assertions | 0.28.1 |
 | Ktor `MockEngine` | Network layer unit tests | 3.4.3 |
-| `kotlinx-coroutines-test` | `runTest`, `TestDispatcher` | 1.10.2 |
 
 ### Quality & Coverage
 
@@ -60,8 +56,6 @@ The project follows **Clean Architecture** with an **MVI** presentation layer, s
 :common-core      → Shared utilities (DispatcherProvider, TimeExtensions, LoggerDelegate)
 ```
 
-Dependency direction: `:app` → `:presentation`, `:data` → `:domain` + `:common-core`. `:domain` has zero Android dependencies and is KMP-ready.
-
 ### MVI Pattern
 
 Each screen owns four files:
@@ -73,18 +67,19 @@ Each screen owns four files:
 | `*Event.kt` | `sealed interface` — one-shot events via `Channel` (errors, navigation) |
 | `*ViewModel.kt` | Holds `StateFlow<State>`, handles `onAction()`, sends events |
 
-Composables are split: a `*ScreenRoot` collects state/events and owns DI/navigation; a `*Screen` is a pure, stateless composable. One-shot events are consumed with `ObserveAsEvents`.
 
 ---
 ## Dependency Injection — Koin Compiler Plugin
 
-Koin 4.x + the **Koin Compiler Plugin** (`io.insert-koin.compiler.plugin`) replaces KSP-based annotation processing. Definitions are auto-discovered at compile time — no manual `modules(...)` list is needed.
+Koin 4.x + the **Koin Compiler Plugin** (`io.insert-koin.compiler.plugin`) replaces KSP-based annotation processing.
+
+Definitions are auto-discovered at compile time — no manual `modules(...)` list is needed.
 
 Each Gradle module declares a root `@Module` + `@ComponentScan` that auto-discovers all annotated classes in its package:
 
 | Annotation | Scope | Used for |
 |---|---|---|
-| `@Singleton` | Application lifetime | Repositories, data sources, `HttpClient` |
+| `@Singleton` | Application lifetime | Repositories, data sources, HttpClient |
 | `@Factory` | New instance per injection | Use cases |
 | `@KoinViewModel` | ViewModel scope | All ViewModels |
 
