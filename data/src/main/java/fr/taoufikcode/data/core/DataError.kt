@@ -29,5 +29,5 @@ fun DataError.Remote.toDomain(): String =
 fun DataError.Local.toDomain(): String =
     when (this) {
         DataError.Local.DISK_FULL -> "Not enough storage space. Please free up space and try again."
-        DataError.Local.UNKNOWN   -> "A local storage error occurred. Please try again."
+        DataError.Local.UNKNOWN -> "A local storage error occurred. Please try again."
     }

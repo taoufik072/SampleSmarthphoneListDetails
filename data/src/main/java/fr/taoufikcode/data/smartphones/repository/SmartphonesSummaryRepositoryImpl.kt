@@ -33,7 +33,10 @@ class SmartphonesSummaryRepositoryImpl(
                     val entities = remoteResult.data.smartphones.map { it.toEntity() }
                     when (val localResult = safeLocalCall { homeDao.replaceAll(entities) }) {
                         is DataResult.Success -> Result.success(Unit)
-                        is DataResult.Error   -> Result.failure(Exception(localResult.error.toDomain()))
+
+                        is DataResult.Error -> Result.failure(
+                            Exception(localResult.error.toDomain()),
+                        )
                     }
                 }
 
@@ -47,7 +50,7 @@ class SmartphonesSummaryRepositoryImpl(
         withContext(dispatchers.io) {
             when (val result = safeLocalCall { homeSyncDate.saveSyncDateHome(timestamp) }) {
                 is DataResult.Success -> Result.success(Unit)
-                is DataResult.Error   -> Result.failure(Exception(result.error.toDomain()))
+                is DataResult.Error -> Result.failure(Exception(result.error.toDomain()))
             }
         }
 
