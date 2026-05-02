@@ -25,7 +25,12 @@ sonar {
         )
         property(
             "sonar.sources",
-            subprojects.joinToString(",") { "${it.projectDir}/src/main" },
+            subprojects
+                .flatMap { p ->
+                    listOf("${p.projectDir}/src/main/java", "${p.projectDir}/src/main/kotlin")
+                }
+                .filter { File(it).exists() }
+                .joinToString(","),
         )
         property(
             "sonar.tests",
