@@ -1,4 +1,4 @@
-package fr.taoufikcode.common
+package fr.taoufikcode.domain.core
 
 import java.time.Clock
 import java.time.Duration

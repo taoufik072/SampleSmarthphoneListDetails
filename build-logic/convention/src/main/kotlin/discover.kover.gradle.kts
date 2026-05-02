@@ -81,10 +81,3 @@ tasks.register("coverageReport") {
     description = "Run all unit tests and generate Kover XML + HTML reports"
     dependsOn("koverXmlReport", "koverHtmlReport")
 }
-
-afterEvaluate {
-    tasks.matching { it.name == "koverXmlReport" || it.name == "koverHtmlReport" }.configureEach {
-        outputs.upToDateWhen { false }
-        outputs.cacheIf { false }
-    }
-}

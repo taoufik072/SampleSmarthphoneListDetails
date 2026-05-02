@@ -1,11 +1,13 @@
-package fr.taoufikcode.common
+package fr.taoufikcode.domain.usecase.core
 
 import assertk.assertThat
 import assertk.assertions.isTrue
+import fr.taoufikcode.domain.core.isExpired
 import org.junit.Test
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneId
+import org.hamcrest.MatcherAssert.assertThat
 
 class TimeExtensionsTest {
     private val fixedTime = Instant.parse("2026-01-01T12:00:00Z").toEpochMilli()
