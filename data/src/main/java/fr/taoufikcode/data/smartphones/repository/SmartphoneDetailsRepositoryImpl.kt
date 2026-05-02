@@ -2,7 +2,7 @@ package fr.taoufikcode.data.smartphones.repository
 
 import fr.taoufikcode.common.coroutines.DispatcherProvider
 import fr.taoufikcode.data.core.DataResult
-import fr.taoufikcode.data.core.toUserMessage
+import fr.taoufikcode.data.core.toDomain
 import fr.taoufikcode.data.smartphones.remote.SmartphoneRemoteDataSource
 import fr.taoufikcode.data.smartphones.remote.dto.toDomain
 import fr.taoufikcode.domain.model.smartphone.SmartphoneDetails
@@ -19,7 +19,7 @@ class SmartphoneDetailsRepositoryImpl(
         withContext(dispatchers.io) {
             when (val result = remoteDataSource.getSmartphoneDetails(id)) {
                 is DataResult.Success -> Result.success(result.data.toDomain())
-                is DataResult.Error -> Result.failure(Exception(result.error.toUserMessage()))
+                is DataResult.Error -> Result.failure(Exception(result.error.toDomain()))
             }
         }
 }

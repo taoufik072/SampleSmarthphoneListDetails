@@ -2,7 +2,8 @@ package fr.taoufikcode.data.smartphones.repository
 
 import fr.taoufikcode.common.coroutines.DispatcherProvider
 import fr.taoufikcode.data.core.DataResult
-import fr.taoufikcode.data.core.toUserMessage
+import fr.taoufikcode.data.core.safeLocalCall
+import fr.taoufikcode.data.core.toDomain
 import fr.taoufikcode.data.smartphones.local.dao.HomeDao
 import fr.taoufikcode.data.smartphones.local.datastore.SyncDataStore
 import fr.taoufikcode.data.smartphones.local.entity.toDomain
@@ -27,23 +28,27 @@ class SmartphonesSummaryRepositoryImpl(
 
     override suspend fun syncHome(): Result<Unit> =
         withContext(dispatchers.io) {
-            when (val result = remoteDataSource.getSmartphoneList()) {
+            when (val remoteResult = remoteDataSource.getSmartphoneList()) {
                 is DataResult.Success -> {
-                    val entities = result.data.smartphones.map { it.toEntity() }
-                    homeDao.replaceAll(entities)
-                    Result.success(Unit)
+                    val entities = remoteResult.data.smartphones.map { it.toEntity() }
+                    when (val localResult = safeLocalCall { homeDao.replaceAll(entities) }) {
+                        is DataResult.Success -> Result.success(Unit)
+                        is DataResult.Error   -> Result.failure(Exception(localResult.error.toDomain()))
+                    }
                 }
 
                 is DataResult.Error -> {
-                    Result.failure(Exception(result.error.toUserMessage()))
+                    Result.failure(Exception(remoteResult.error.toDomain()))
                 }
             }
         }
 
     override suspend fun saveSyncDateHome(timestamp: Long): Result<Unit> =
         withContext(dispatchers.io) {
-            homeSyncDate.saveSyncDateHome(timestamp)
-            Result.success(Unit)
+            when (val result = safeLocalCall { homeSyncDate.saveSyncDateHome(timestamp) }) {
+                is DataResult.Success -> Result.success(Unit)
+                is DataResult.Error   -> Result.failure(Exception(result.error.toDomain()))
+            }
         }
 
     override fun getSyncDateHomeStatus() = homeSyncDate.lastSyncDateHome()

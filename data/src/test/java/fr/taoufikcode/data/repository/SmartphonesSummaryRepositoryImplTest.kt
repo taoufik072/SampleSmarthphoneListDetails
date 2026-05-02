@@ -17,9 +17,14 @@ import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headers
+import android.database.sqlite.SQLiteFullException
+import fr.taoufikcode.data.core.DataError
+import fr.taoufikcode.data.core.toDomain
+import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import java.io.IOException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
@@ -103,5 +108,41 @@ class SmartphonesSummaryRepositoryImplTest {
 
             assertThat(result.isFailure).isTrue()
             assertThat(result.exceptionOrNull()?.message).isEqualTo("Server error. Please try again later.")
+        }
+
+    @Test
+    fun `syncHome when dao throws SQLiteFullException returns failure with DISK_FULL message`() =
+        runTest {
+            coEvery { dao.replaceAll(any()) } throws SQLiteFullException()
+
+            val result = repository.syncHome()
+
+            assertThat(result.isFailure).isTrue()
+            assertThat(result.exceptionOrNull()?.message)
+                .isEqualTo(DataError.Local.DISK_FULL.toDomain())
+        }
+
+    @Test
+    fun `syncHome when dao throws generic exception returns failure with UNKNOWN message`() =
+        runTest {
+            coEvery { dao.replaceAll(any()) } throws RuntimeException("unexpected db error")
+
+            val result = repository.syncHome()
+
+            assertThat(result.isFailure).isTrue()
+            assertThat(result.exceptionOrNull()?.message)
+                .isEqualTo(DataError.Local.UNKNOWN.toDomain())
+        }
+
+    @Test
+    fun `saveSyncDateHome when dataStore throws IOException returns failure with DISK_FULL message`() =
+        runTest {
+            coEvery { dataStore.saveSyncDateHome(any()) } throws IOException("unexpected db error")
+
+            val result = repository.saveSyncDateHome(System.currentTimeMillis())
+
+            assertThat(result.isFailure).isTrue()
+            assertThat(result.exceptionOrNull()?.message)
+                .isEqualTo(DataError.Local.UNKNOWN.toDomain())
         }
 }
