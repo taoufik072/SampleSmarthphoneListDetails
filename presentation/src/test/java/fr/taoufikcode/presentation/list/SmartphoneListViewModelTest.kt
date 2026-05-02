@@ -8,9 +8,8 @@ import assertk.assertions.isFalse
 import assertk.assertions.isInstanceOf
 import assertk.assertions.isNull
 import fr.taoufikcode.domain.model.home.SmartphoneSummary
+import fr.taoufikcode.domain.usecase.home.CheckAndSyncSmartphonesUseCase
 import fr.taoufikcode.domain.usecase.home.GetSmartphonesSummaryUseCase
-import fr.taoufikcode.domain.usecase.home.GetSyncStatusUseCase
-import fr.taoufikcode.domain.usecase.home.SaveSyncDateUseCase
 import fr.taoufikcode.domain.usecase.home.SyncSmartphonesUseCase
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -31,8 +30,7 @@ import org.junit.Test
 class SmartphoneListViewModelTest {
     private lateinit var getSmartphonesUseCase: GetSmartphonesSummaryUseCase
     private lateinit var syncUseCase: SyncSmartphonesUseCase
-    private lateinit var getSyncStatusUseCase: GetSyncStatusUseCase
-    private lateinit var saveSyncDateUseCase: SaveSyncDateUseCase
+    private lateinit var checkAndSyncUseCase: CheckAndSyncSmartphonesUseCase
 
     private lateinit var viewModel: SmartphoneListViewModel
 
@@ -43,8 +41,7 @@ class SmartphoneListViewModelTest {
         Dispatchers.setMain(testDispatcher)
         getSmartphonesUseCase = mockk(relaxed = true)
         syncUseCase = mockk(relaxed = true)
-        getSyncStatusUseCase = mockk(relaxed = true)
-        saveSyncDateUseCase = mockk(relaxed = true)
+        checkAndSyncUseCase = mockk(relaxed = true)
     }
 
     @After
@@ -62,15 +59,14 @@ class SmartphoneListViewModelTest {
                     SmartphoneSummary("2", "Samsung S24", "url2"),
                 )
             every { getSmartphonesUseCase() } returns flowOf(smartphones)
-            coEvery { getSyncStatusUseCase.invoke() } returns flowOf(0L)
+            coEvery { checkAndSyncUseCase() } returns Result.success(Unit)
 
             // When
             viewModel =
                 SmartphoneListViewModel(
                     getSmartphonesUseCase,
                     syncUseCase,
-                    getSyncStatusUseCase,
-                    saveSyncDateUseCase,
+                    checkAndSyncUseCase,
                 )
 
             // Then
@@ -87,15 +83,14 @@ class SmartphoneListViewModelTest {
         runTest {
             // Given
             every { getSmartphonesUseCase() } returns flowOf(emptyList())
-            coEvery { getSyncStatusUseCase.invoke() } returns flowOf(0L)
+            coEvery { checkAndSyncUseCase() } returns Result.success(Unit)
             coEvery { syncUseCase() } returns Result.success(Unit)
 
             viewModel =
                 SmartphoneListViewModel(
                     getSmartphonesUseCase,
                     syncUseCase,
-                    getSyncStatusUseCase,
-                    saveSyncDateUseCase,
+                    checkAndSyncUseCase,
                 )
 
             testScheduler.advanceUntilIdle()
@@ -114,15 +109,14 @@ class SmartphoneListViewModelTest {
             // Given
             val errorMessage = "Sync failed"
             every { getSmartphonesUseCase() } returns flowOf(emptyList())
-            coEvery { getSyncStatusUseCase.invoke() } returns flowOf(0L)
+            coEvery { checkAndSyncUseCase() } returns Result.success(Unit)
             coEvery { syncUseCase() } returns Result.failure(Exception(errorMessage))
 
             viewModel =
                 SmartphoneListViewModel(
                     getSmartphonesUseCase,
                     syncUseCase,
-                    getSyncStatusUseCase,
-                    saveSyncDateUseCase,
+                    checkAndSyncUseCase,
                 )
 
             testScheduler.advanceUntilIdle()
