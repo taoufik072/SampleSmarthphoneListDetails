@@ -91,10 +91,7 @@ sonar {
         )
     }
 }
-
-// The SonarQube Gradle plugin auto-applies itself to every subproject and registers their
-// source dirs as child modules. Combined with the explicit sonar.sources above, this causes
-// "can't be indexed twice" errors. Skipping subprojects enforces a flat single-module analysis.
+//  "can't be indexed twice" call fix errors.
 subprojects {
     sonar {
         isSkipProject = true

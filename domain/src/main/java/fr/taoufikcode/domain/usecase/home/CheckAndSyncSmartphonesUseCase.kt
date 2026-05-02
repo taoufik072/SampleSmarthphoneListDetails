@@ -1,6 +1,6 @@
 package fr.taoufikcode.domain.usecase.home
 
-import fr.taoufikcode.common.isExpired
+import fr.taoufikcode.domain.core.isExpired
 import fr.taoufikcode.domain.repository.home.SmartphonesSummaryRepository
 import kotlinx.coroutines.flow.first
 import org.koin.core.annotation.Factory
