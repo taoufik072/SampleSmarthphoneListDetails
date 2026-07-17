@@ -2,10 +2,10 @@
 
 A sample Android application showcasing a Clean Architecture + MVI stack with modern tooling: Koin Compiler Plugin, Ktor, Jetpack Compose, Room, and a full quality pipeline (Detekt, ktlint, Kover, SonarCloud).
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=taoufik072_SampleSmarthphoneListDetails&metric=alert_status)](https://sonarcloud.io/project/overview?id=taoufik072_SampleSmarthphoneListDetails)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=taoufik072_SampleSmarthphoneListDetails&metric=coverage)](https://sonarcloud.io/project/overview?id=taoufik072_SampleSmarthphoneListDetails)
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=taoufik072_SampleSmarthphoneListDetails&metric=bugs)](https://sonarcloud.io/project/overview?id=taoufik072_SampleSmarthphoneListDetails)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=taoufik072_SampleSmarthphoneListDetails&metric=code_smells)](https://sonarcloud.io/project/overview?id=taoufik072_SampleSmarthphoneListDetails)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=taoufik072_SampleSmarthphoneListDetails&metric=alert_status&token=d606cf843e452732cbc1bc6ad8f418e835e4c8a4)](https://sonarcloud.io/project/overview?id=taoufik072_SampleSmarthphoneListDetails)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=taoufik072_SampleSmarthphoneListDetails&metric=coverage&token=d606cf843e452732cbc1bc6ad8f418e835e4c8a4)](https://sonarcloud.io/project/overview?id=taoufik072_SampleSmarthphoneListDetails)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=taoufik072_SampleSmarthphoneListDetails&metric=bugs&token=d606cf843e452732cbc1bc6ad8f418e835e4c8a4)](https://sonarcloud.io/project/overview?id=taoufik072_SampleSmarthphoneListDetails)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=taoufik072_SampleSmarthphoneListDetails&metric=code_smells&token=d606cf843e452732cbc1bc6ad8f418e835e4c8a4)](https://sonarcloud.io/project/overview?id=taoufik072_SampleSmarthphoneListDetails)
 
 ---
 
