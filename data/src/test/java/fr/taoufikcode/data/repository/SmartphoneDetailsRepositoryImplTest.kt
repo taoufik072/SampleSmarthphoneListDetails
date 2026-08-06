@@ -5,59 +5,44 @@ package fr.taoufikcode.data.repository
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isTrue
-import fr.taoufikcode.data.data.SmartphoneData
+import fr.taoufikcode.data.core.DataError
+import fr.taoufikcode.data.core.DataResult
 import fr.taoufikcode.data.smartphones.remote.SmartphoneRemoteDataSource
+import fr.taoufikcode.data.smartphones.remote.dto.SmartphoneDetailsDto
 import fr.taoufikcode.data.smartphones.repository.SmartphoneDetailsRepositoryImpl
 import fr.taoufikcode.data.utils.TestDispatcherProvider
-import fr.taoufikcode.data.utils.TestHttpClientFactory
-import io.ktor.client.engine.mock.MockEngine
-import io.ktor.client.engine.mock.respond
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.headers
+import io.mockk.coEvery
+import io.mockk.mockk
+import java.time.LocalDate
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
-import java.time.LocalDate
 
 class SmartphoneDetailsRepositoryImplTest {
     private val dispatchers = TestDispatcherProvider(UnconfinedTestDispatcher())
+    private lateinit var remoteDataSource: SmartphoneRemoteDataSource
     private lateinit var repository: SmartphoneDetailsRepositoryImpl
 
-    data class MockResponse(
-        val content: String,
-        val statusCode: HttpStatusCode,
+    private val successDto = SmartphoneDetailsDto(
+        id = "1",
+        model = "iPhone 15",
+        price = 999.99,
+        description = "Apple flagship",
+        constructionDate = "2023-09-12",
+        imageUrl = "https://img.test/1.jpg",
     )
-
-    private var detailsResponse = MockResponse(SmartphoneData.detailsJson, HttpStatusCode.OK)
 
     @Before
     fun setUp() {
-        val engine =
-            MockEngine.create {
-                dispatcher = dispatchers.testDispatcher
-                addHandler { request ->
-                    when {
-                        request.url.encodedPath.startsWith("/smartphoneDetails/") -> {
-                            respond(
-                                content = detailsResponse.content,
-                                status = detailsResponse.statusCode,
-                                headers = headers { set("Content-Type", "application/json") },
-                            )
-                        }
+        remoteDataSource = mockk()
+        coEvery { remoteDataSource.getSmartphoneDetails(any()) } returns DataResult.Success(successDto)
 
-                        else -> {
-                            respond("Not mocked", HttpStatusCode.NotFound)
-                        }
-                    }
-                }
-            }
-        repository =
-            SmartphoneDetailsRepositoryImpl(
-                remoteDataSource = SmartphoneRemoteDataSource(TestHttpClientFactory.create(engine)),
-                dispatchers = dispatchers,
-            )
+        repository = SmartphoneDetailsRepositoryImpl(
+            remoteDataSource = remoteDataSource,
+            dispatchers = dispatchers,
+        )
     }
 
     @Test
@@ -76,7 +61,7 @@ class SmartphoneDetailsRepositoryImplTest {
     @Test
     fun `getSmartphoneById on 500 returns failure with server error message`() =
         runTest {
-            detailsResponse = MockResponse("error", HttpStatusCode.InternalServerError)
+            coEvery { remoteDataSource.getSmartphoneDetails(any()) } returns DataResult.Error(DataError.Remote.SERVER)
 
             val result = repository.getSmartphoneById("1")
 
@@ -87,7 +72,7 @@ class SmartphoneDetailsRepositoryImplTest {
     @Test
     fun `getSmartphoneById on 408 returns failure with timeout message`() =
         runTest {
-            detailsResponse = MockResponse("error", HttpStatusCode.RequestTimeout)
+            coEvery { remoteDataSource.getSmartphoneDetails(any()) } returns DataResult.Error(DataError.Remote.REQUEST_TIMEOUT)
 
             val result = repository.getSmartphoneById("1")
 
@@ -98,7 +83,7 @@ class SmartphoneDetailsRepositoryImplTest {
     @Test
     fun `getSmartphoneById on 429 returns failure with TOO_MANY_REQUESTS message`() =
         runTest {
-            detailsResponse = MockResponse("error", HttpStatusCode.TooManyRequests)
+            coEvery { remoteDataSource.getSmartphoneDetails(any()) } returns DataResult.Error(DataError.Remote.TOO_MANY_REQUESTS)
 
             val result = repository.getSmartphoneById("1")
 
@@ -109,7 +94,7 @@ class SmartphoneDetailsRepositoryImplTest {
     @Test
     fun `getSmartphoneById on 401 returns failure with UNKNOWN error message`() =
         runTest {
-            detailsResponse = MockResponse("error", HttpStatusCode.Unauthorized)
+            coEvery { remoteDataSource.getSmartphoneDetails(any()) } returns DataResult.Error(DataError.Remote.UNKNOWN)
 
             val result = repository.getSmartphoneById("1")
 

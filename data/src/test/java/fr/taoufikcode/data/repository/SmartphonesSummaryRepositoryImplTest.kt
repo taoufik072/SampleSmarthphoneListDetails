@@ -2,24 +2,21 @@
 
 package fr.taoufikcode.data.repository
 
+import android.database.sqlite.SQLiteFullException
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isTrue
-import fr.taoufikcode.data.data.SmartphoneData
+import fr.taoufikcode.data.core.DataError
+import fr.taoufikcode.data.core.DataResult
+import fr.taoufikcode.data.core.toDomain
 import fr.taoufikcode.data.smartphones.local.dao.HomeDao
 import fr.taoufikcode.data.smartphones.local.datastore.SyncDataStore
 import fr.taoufikcode.data.smartphones.local.entity.SmartphoneSummaryEntity
 import fr.taoufikcode.data.smartphones.remote.SmartphoneRemoteDataSource
+import fr.taoufikcode.data.smartphones.remote.dto.HomeResponseDto
+import fr.taoufikcode.data.smartphones.remote.dto.SmartphoneSummaryDto
 import fr.taoufikcode.data.smartphones.repository.SmartphonesSummaryRepositoryImpl
 import fr.taoufikcode.data.utils.TestDispatcherProvider
-import fr.taoufikcode.data.utils.TestHttpClientFactory
-import io.ktor.client.engine.mock.MockEngine
-import io.ktor.client.engine.mock.respond
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.headers
-import android.database.sqlite.SQLiteFullException
-import fr.taoufikcode.data.core.DataError
-import fr.taoufikcode.data.core.toDomain
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -37,45 +34,31 @@ class SmartphonesSummaryRepositoryImplTest {
     private val dispatchers = TestDispatcherProvider(UnconfinedTestDispatcher())
     private lateinit var dao: HomeDao
     private lateinit var dataStore: SyncDataStore
+    private lateinit var remoteDataSource: SmartphoneRemoteDataSource
     private lateinit var repository: SmartphonesSummaryRepositoryImpl
 
-    data class MockResponse(
-        val content: String,
-        val statusCode: HttpStatusCode,
+    private val successResponse = DataResult.Success(
+        HomeResponseDto(
+            smartphones = listOf(
+                SmartphoneSummaryDto("1", "iPhone 15", "https://img.test/1.jpg"),
+                SmartphoneSummaryDto("2", "Galaxy S24", "https://img.test/2.jpg"),
+            )
+        )
     )
-
-    private var listResponse = MockResponse(SmartphoneData.homeContentsJson, HttpStatusCode.OK)
 
     @Before
     fun setup() {
         dao = mockk(relaxed = true)
         dataStore = mockk(relaxed = true)
-        val engine =
-            MockEngine.create {
-                dispatcher = dispatchers.testDispatcher
-                addHandler { request ->
-                    when (request.url.encodedPath) {
-                        "/home/contents" -> {
-                            respond(
-                                content = listResponse.content,
-                                status = listResponse.statusCode,
-                                headers = headers { set("Content-Type", "application/json") },
-                            )
-                        }
+        remoteDataSource = mockk()
+        coEvery { remoteDataSource.getSmartphoneList() } returns successResponse
 
-                        else -> {
-                            respond("Not mocked", HttpStatusCode.NotFound)
-                        }
-                    }
-                }
-            }
-        repository =
-            SmartphonesSummaryRepositoryImpl(
-                remoteDataSource = SmartphoneRemoteDataSource(TestHttpClientFactory.create(engine)),
-                homeDao = dao,
-                homeSyncDate = dataStore,
-                dispatchers = dispatchers,
-            )
+        repository = SmartphonesSummaryRepositoryImpl(
+            remoteDataSource = remoteDataSource,
+            homeDao = dao,
+            homeSyncDate = dataStore,
+            dispatchers = dispatchers,
+        )
     }
 
     @Test
@@ -102,7 +85,7 @@ class SmartphonesSummaryRepositoryImplTest {
     @Test
     fun `syncHome on 500 returns failure with server error message`() =
         runTest {
-            listResponse = MockResponse("error", HttpStatusCode.InternalServerError)
+            coEvery { remoteDataSource.getSmartphoneList() } returns DataResult.Error(DataError.Remote.SERVER)
 
             val result = repository.syncHome()
 
